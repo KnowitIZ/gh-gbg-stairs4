@@ -1,0 +1,40 @@
+﻿@page "/counter"
+
+<h1>Counter</h1>
+
+<p role="status">Current reading: @accData</p>
+
+<button class="btn btn-primary" @onclick="StartMonitoring">Start monitoring</button>
+
+<button class="btn btn-primary" @onclick="StopMonitoring">Stop monitoring</button>
+
+@code {
+    private AccelerometerData accData;
+
+    private void StartMonitoring()
+    {
+        if (Accelerometer.Default.IsSupported && !Accelerometer.Default.IsMonitoring)
+        {
+            // Turn on accelerometer
+            Accelerometer.Default.ReadingChanged += Accelerometer_ReadingChanged;
+            Accelerometer.Default.Start(SensorSpeed.UI);
+        }
+
+    }
+
+    private void StopMonitoring()
+    {
+        if (Accelerometer.Default.IsSupported && Accelerometer.Default.IsMonitoring)
+        {
+            // Turn off accelerometer
+            Accelerometer.Default.Stop();
+            Accelerometer.Default.ReadingChanged -= Accelerometer_ReadingChanged;
+        }
+    }
+
+    private void Accelerometer_ReadingChanged(object sender, AccelerometerChangedEventArgs e)
+    {
+        accData = e.Reading;
+        StateHasChanged();
+    }
+}

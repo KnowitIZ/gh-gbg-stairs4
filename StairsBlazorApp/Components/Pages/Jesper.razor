@@ -1,5 +1,9 @@
 ﻿@page "/jesper"
 @using System.Diagnostics
+@using ChartJs.Blazor;
+@using ChartJs.Blazor.PieChart
+@using System.Drawing
+@inject IJSRuntime Js
 
 <h1>Jesper Stopwatch</h1>
 
@@ -14,13 +18,20 @@
 
 <button class="btn btn-primary" @onclick="ResetWatch">Reset</button>
 
+<div>
+    <canvas id="myChart1"></canvas>
+</div>
+
+
 @code {
     private Stopwatch jesperWatch = new Stopwatch();
     private Queue<String> laps = new Queue<String>();
     private String time = "";
+    private int[] testData = [1, 2, 3, 4, 5];
 
-    private void StartWatch()
+    private async void StartWatch()
     {
+        await Js.InvokeVoidAsync("createChart",testData);
         if (Accelerometer.Default.IsSupported && !Accelerometer.Default.IsMonitoring)
         {
             // Turn on accelerometer
@@ -54,8 +65,11 @@
         laps.Clear();
     }
 
-    private void Lap()
+    private async void Lap()
     {
+        var rand = new Random();
+        testData.Append(rand.Next(40));
+        await Js.InvokeVoidAsync("updateChart", testData);
         if (jesperWatch.IsRunning)
         {
             laps.Enqueue(jesperWatch.Elapsed.ToString("mm':'ss"));

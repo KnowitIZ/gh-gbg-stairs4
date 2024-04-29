@@ -1,0 +1,71 @@
+﻿@page "/jesper"
+@using System.Diagnostics
+
+<h1>Jesper Stopwatch</h1>
+
+<p role="status">Time: @time</p>
+<p role="status">Laps: @String.Join(" | ", laps);</p>
+
+<button class="btn btn-primary" @onclick="StartWatch">Start</button>
+
+<button class="btn btn-primary" @onclick="StopWatch">Stop</button>
+
+<button class="btn btn-primary" @onclick="Lap">Lap</button>
+
+<button class="btn btn-primary" @onclick="ResetWatch">Reset</button>
+
+@code {
+    private Stopwatch jesperWatch = new Stopwatch();
+    private Queue<String> laps = new Queue<String>();
+    private String time = "";
+
+    private void StartWatch()
+    {
+        if (Accelerometer.Default.IsSupported && !Accelerometer.Default.IsMonitoring)
+        {
+            // Turn on accelerometer
+            Accelerometer.Default.ReadingChanged += Accelerometer_ReadingChanged;
+            Accelerometer.Default.Start(SensorSpeed.UI);
+        }
+
+        if(!jesperWatch.IsRunning)
+        {
+            jesperWatch.Start();
+        }
+    }
+
+    private void StopWatch()
+    {
+        if (Accelerometer.Default.IsSupported && Accelerometer.Default.IsMonitoring)
+        {
+            // Turn off accelerometer
+            Accelerometer.Default.Stop();
+            Accelerometer.Default.ReadingChanged -= Accelerometer_ReadingChanged;
+        }
+        if (jesperWatch.IsRunning)
+        {
+            jesperWatch.Stop();
+        }
+    }
+
+    private void ResetWatch()
+    {
+        jesperWatch.Reset();
+        laps.Clear();
+    }
+
+    private void Lap()
+    {
+        if (jesperWatch.IsRunning)
+        {
+            laps.Enqueue(jesperWatch.Elapsed.ToString("mm':'ss"));
+            jesperWatch.Restart();
+        }
+    }
+
+    private void Accelerometer_ReadingChanged(object sender, AccelerometerChangedEventArgs e)
+    {
+        time = jesperWatch.Elapsed.ToString("mm':'ss");
+        StateHasChanged();
+    }
+}

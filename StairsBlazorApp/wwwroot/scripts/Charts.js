@@ -11,7 +11,7 @@ function createChart(d)
     window.myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [1,2,3,4,5,6,7,8,9,10],
+            labels: [0],
             datasets: [{
                 borderColor: 'rgb(75, 192, 192)',
                 borderWidth: 1,
@@ -22,7 +22,8 @@ function createChart(d)
     });
 }
 
-function updateChart(d) {
-    window.myChart.data.datasets[0].data[0] = d;
+function updateChart(time, value) {
+    window.myChart.data.labels.push(time);
+    window.myChart.data.datasets[0].data.push(value);
     window.myChart.update();
 }

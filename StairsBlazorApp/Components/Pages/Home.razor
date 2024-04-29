@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.Diagnostics
+@inject IJSRuntime Js
 
 <h1>Stairs 4.0</h1>
 
@@ -14,6 +15,11 @@ Welcome to Stairs.
 
 <button class="btn btn-primary" @onclick="Stop">Stop</button>
 
+<div>
+    <canvas id="myChart1"></canvas>
+</div>
+
+
 @if (doneReading)
 {
     <p role="status">Pressure difference: @(pressure - startPressure)</p>
@@ -27,16 +33,18 @@ Welcome to Stairs.
     private double startPressure;
     private bool isFirstReading = true;
     private bool doneReading = false;
+    private List<double> lastFive = [];
 
     private Stopwatch? stopWatch;
 
-    private void Start()
+    private async void Start()
     {
+        await Js.InvokeVoidAsync("createChart", []);
         if (Barometer.Default.IsSupported && !Barometer.Default.IsMonitoring)
         {
             // Turn on barometer
             Barometer.Default.ReadingChanged += Barometer_ReadingChanged;
-            Barometer.Default.Start(SensorSpeed.UI);
+            Barometer.Default.Start(SensorSpeed.Default);
         }
         isFirstReading = true;
         doneReading = false;
@@ -55,7 +63,7 @@ Welcome to Stairs.
         doneReading = true;
     }
 
-    private void Barometer_ReadingChanged(object? sender, BarometerChangedEventArgs e)
+    private async void Barometer_ReadingChanged(object? sender, BarometerChangedEventArgs e)
     {
         pressure = e.Reading.PressureInHectopascals;
 
@@ -64,6 +72,13 @@ Welcome to Stairs.
             startPressure = pressure;
             isFirstReading = false;
         }
+        lastFive.Add(pressure);
+        if (lastFive.Count >= 5)
+        {
+            await Js.InvokeVoidAsync("updateChart", stopWatch?.Elapsed.TotalSeconds.ToString(), lastFive.Average());
+            lastFive.Clear();
+        }
+        StateHasChanged();
     }
 
 }

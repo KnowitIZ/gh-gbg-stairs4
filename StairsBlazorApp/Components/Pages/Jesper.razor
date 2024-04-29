@@ -1,7 +1,5 @@
 ﻿@page "/jesper"
 @using System.Diagnostics
-@using ChartJs.Blazor;
-@using ChartJs.Blazor.PieChart
 @using System.Drawing
 @inject IJSRuntime Js
 
@@ -77,7 +75,7 @@
         }
     }
 
-    private void Accelerometer_ReadingChanged(object sender, AccelerometerChangedEventArgs e)
+    private void Accelerometer_ReadingChanged(object? sender, AccelerometerChangedEventArgs e)
     {
         time = jesperWatch.Elapsed.ToString("mm':'ss");
         StateHasChanged();
